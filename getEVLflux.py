@@ -1,5 +1,5 @@
 '''
-Author: Kent Ritchie - last updated 2/23/19
+Author: Kent Ritchie - last updated 3/5/19
 
 Purpose: Creates txt file of flux and time values for a single flare event
 
@@ -20,7 +20,7 @@ sod: seconds of day for each EVE line measurement as an array of shape (0,360*nf
 if savetxt == True: saves .txt file of array where array[0] = flux, array[1] = sod
 
 Usage:
-fluxarray = getEVLflux('2010-06-12 00:30','2010-06-12 01:02', True)
+fluxarray = getEVLflux(' 2010-06-12 00:30',' 2010-06-12 01:02', True)
 
 '''
 
@@ -32,13 +32,13 @@ import matplotlib.pyplot as plt
 
 def getEVLflux(tstart,tfinal,savetxt,savename):
     
-    start_year = int(tstart[0:4])
-    start_month = int(tstart[5:7])
-    start_day = int(tstart[8:10])
-    start_hour = int(tstart[11:13])
+    start_year = int(tstart[1:5])
+    start_month = int(tstart[6:8])
+    start_day = int(tstart[9:11])
+    start_hour = int(tstart[12:14])
     if start_hour < 10:
         start_hour = '0' + str(start_hour)
-    start_minute = int(tstart[15:17])
+    start_minute = int(tstart[16:18])
     
     #print('year:',start_year)
     #print('month:',start_month)
@@ -46,13 +46,13 @@ def getEVLflux(tstart,tfinal,savetxt,savename):
     #print('hour:',start_hour)
     #print('min:',start_minute)
     
-    final_year = int(tfinal[0:4])
-    final_month = int(tfinal[5:7])
-    final_day = int(tfinal[8:10])
-    final_hour = int(tfinal[11:13])
+    final_year = int(tfinal[1:5])
+    final_month = int(tfinal[6:8])
+    final_day = int(tfinal[9:11])
+    final_hour = int(tfinal[12:14])
     if final_hour < 10:
         final_hour = '0' + str(final_hour)
-    final_minute = int(tfinal[15:17])
+    final_minute = int(tfinal[16:18])
     
     
     start_doy = (dt.date(start_year, start_month, start_day) - dt.date(start_year,1,1)).days + 1
@@ -73,8 +73,10 @@ def getEVLflux(tstart,tfinal,savetxt,savename):
     linenum = np.arange(0,39,1)
     timenum = np.arange(0,360,1)
     EVLfiles = []
-    flux = np.empty(39,dtype=object)
-    sod = np.empty(360*nfiles,dtype=float)
+    fluxtime = np.empty((360*nfiles,40),dtype=float)
+    rows = range(0,360*nfiles)
+    #flux = np.empty(39,dtype=object)
+    #sod = np.empty(360*nfiles,dtype=float)
 
     for i in filenum:
         if i == 0:
@@ -118,20 +120,16 @@ def getEVLflux(tstart,tfinal,savetxt,savename):
         times = linesdata['SOD']
         
         for j in linenum:
-            lineflux = np.asarray(data[:,j])
+            lineflux = data[:,j]
             
-            if i == 0:
-                flux[j] = lineflux[:]
-            else:
-                flux[j] = np.append(flux[j],lineflux)
+            fluxtime[i*360:360+(i*360),j+1] = lineflux
             
         for k in timenum:
             timeval = times[k]
-            sod[k+(i*360)] = timeval
-            
-    fluxtimearray = [flux,sod]
 
+            fluxtime[i*360:360+(i*360),0] = timeval
+    
     if savetxt == True:    
-        np.savetxt('/Users/kentritchie1/Desktop/KazachenkoResearch/EVE_project/FlareTxtFiles/%s.txt' % savename, fluxtimearray,fmt = '%s')
+        np.savetxt('/Users/kentritchie1/Desktop/KazachenkoResearch/EVE_project/FlareTxtFiles/%s.txt.gz' % savename, fluxtime,fmt = '%f',delimiter=',')
 
-    return fluxtimearray
+    return fluxtime
