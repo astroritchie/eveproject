@@ -1,5 +1,5 @@
 '''
-Author: Kent Ritchie - last updated 3/5/19
+Author: Kent Ritchie - last updated 3/7/19
 
 Purpose: Creates txt file of flux and time values for a single flare event
 
@@ -130,6 +130,6 @@ def getEVLflux(tstart,tfinal,savetxt,savename):
             fluxtime[i*360:360+(i*360),0] = timeval
     
     if savetxt == True:    
-        np.savetxt('/Users/kentritchie1/Desktop/KazachenkoResearch/EVE_project/FlareTxtFiles/%s.txt.gz' % savename, fluxtime,fmt = '%f',delimiter=',')
+        np.savetxt('/Users/kentritchie1/Desktop/KazachenkoResearch/EVE_project/FlareTxtFiles/%s.txt' % savename, fluxtime,fmt = '%1.10f',delimiter=',')
 
     return fluxtime
