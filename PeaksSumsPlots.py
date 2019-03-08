@@ -63,3 +63,16 @@ with open('/Users/kentritchie1/Desktop/KazachenkoResearch/RibbonDB_v1.0/ribbondb
         plt.ylabel('Peak Flux [W/M^2]')
         plt.grid()
         plt.show()
+        
+        vals = [ val for val in sums[:,i] if val > 0]
+
+        plt.figure(figsize=(14,8))
+        plt.scatter(phi_rbn,sums[:,i],marker='.')
+        plt.ylim(0.95*min(vals),1.05*max(vals))
+        plt.xscale('log')
+        plt.yscale('log')
+        plt.title('Total Flux vs Reconnection Flux\n%s' % wavelengths[i])
+        plt.xlabel('Total Unsigned Flare-Ribbon Reconnection Flux [MX]')
+        plt.ylabel('Total Flux [W/M^2]')
+        plt.grid()
+        plt.show()
