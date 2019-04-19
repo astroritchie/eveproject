@@ -1,5 +1,5 @@
 '''
-Author: Kent Ritchie - last updated 3/7/19
+Author: Kent Ritchie - last updated 4/19/19
 
 Purpose: Creates txt file of flux and time values for a single flare event
 
@@ -38,22 +38,23 @@ def getEVLflux(tstart,tfinal,savetxt,savename):
     start_hour = int(tstart[12:14])
     if start_hour < 10:
         start_hour = '0' + str(start_hour)
-    start_minute = int(tstart[16:18])
+    start_minute = int(tstart[15:17])
+    if start_minute < 10:
+        start_minute = '0' + str(start_minute)
     
-    #print('year:',start_year)
-    #print('month:',start_month)
-    #print('day:',start_day)
-    #print('hour:',start_hour)
-    #print('min:',start_minute)
-    
+    start_sod = float((int(start_hour) * 3600) + (int(start_minute) * 60))
+        
     final_year = int(tfinal[1:5])
     final_month = int(tfinal[6:8])
     final_day = int(tfinal[9:11])
     final_hour = int(tfinal[12:14])
     if final_hour < 10:
         final_hour = '0' + str(final_hour)
-    final_minute = int(tfinal[16:18])
+    final_minute = int(tfinal[15:17])
+    if final_minute < 10:
+        final_minute = '0' + str(final_minute)
     
+    final_sod = float((int(final_hour) * 3600) + (int(final_minute) * 60))
     
     start_doy = (dt.date(start_year, start_month, start_day) - dt.date(start_year,1,1)).days + 1
     end_doy = (dt.date(final_year, final_month, final_day) - dt.date(final_year,1,1)).days + 1
@@ -71,12 +72,8 @@ def getEVLflux(tstart,tfinal,savetxt,savename):
     
     filenum = np.arange(0,nfiles,1)
     linenum = np.arange(0,39,1)
-    timenum = np.arange(0,360,1)
     EVLfiles = []
     fluxtime = np.empty((360*nfiles,40),dtype=float)
-    rows = range(0,360*nfiles)
-    #flux = np.empty(39,dtype=object)
-    #sod = np.empty(360*nfiles,dtype=float)
 
     for i in filenum:
         if i == 0:
@@ -118,17 +115,22 @@ def getEVLflux(tstart,tfinal,savetxt,savename):
         linesdata = hdul['LinesData'].data
         data = linesdata['Line_Irradiance']
         times = linesdata['SOD']
+        flags = linesdata['FLAGS']
+        sc_flags = linesdata['SC_FLAGS']
         
         for j in linenum:
             lineflux = data[:,j]
-            
             fluxtime[i*360:360+(i*360),j+1] = lineflux
             
-        for k in timenum:
+        for k in range(0,len(times)):
             timeval = times[k]
-
-            fluxtime[i*360:360+(i*360),0] = timeval
-    
+            
+            if not ( start_sod <= timeval <= final_sod ):
+                fluxtime[k+(i*360),:] = 0
+                
+            else:
+                fluxtime[k+(i*360),0] = timeval
+          
     if savetxt == True:    
         np.savetxt('/Users/kentritchie1/Desktop/KazachenkoResearch/EVE_project/FlareTxtFiles/%s.txt' % savename, fluxtime,fmt = '%1.10f',delimiter=',')
 

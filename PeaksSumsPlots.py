@@ -12,8 +12,8 @@ from scipy import stats
 directory = '/Users/kentritchie1/Desktop/KazachenkoResearch/EVE_project/FlareTxtFiles/total/'
 
 
-sums = np.loadtxt(directory+'FlareSums.txt',delimiter=';',dtype=np.float)
-peaks = np.loadtxt(directory+'FlarePeaks.txt',delimiter=';',dtype=np.float)
+sums = np.loadtxt(directory+'bgsFlareSums.txt',delimiter=';',dtype=np.float)
+peaks = np.loadtxt(directory+'bgsFlarePeaks.txt',delimiter=';',dtype=np.float)
 
 #Plotting
 
@@ -49,30 +49,42 @@ with open('/Users/kentritchie1/Desktop/KazachenkoResearch/RibbonDB_v1.0/ribbondb
         'C III 97.7030nm','H I 102.572nm','O VI 103.190nm'    
     ]
 
+    
+    
     for i in range(0,39):
         
-        vals = [ val for val in peaks[:,i] if val > 0]
+        vals = [ val for val in peaks[2:,i] if val > 0 ]#and val < 1]
 
         plt.figure(figsize=(14,8))
-        plt.scatter(phi_rbn,peaks[:,i],marker='.')
+        plt.scatter(phi_rbn,peaks[2:,i],marker='.')
         plt.ylim(0.95*min(vals),1.05*max(vals))
         plt.xscale('log')
         plt.yscale('log')
-        plt.title('Peak Flux vs Reconnection Flux\n%s' % wavelengths[i])
+        plt.title('Peak Flux vs Reconnection Flux\n%s\nPercent of Values Missing/Corrupt:%3d %%' % (wavelengths[i],(peaks[1,i]/peaks[0,i])*100))
         plt.xlabel('Total Unsigned Flare-Ribbon Reconnection Flux [MX]')
         plt.ylabel('Peak Flux [W/M^2]')
         plt.grid()
-        plt.show()
+        #plt.show()
+        plt.savefig('/Users/kentritchie1/Desktop/KazachenkoResearch/eveproject/plots/bgspeakflux_%s.pdf' % (wavelengths[i].strip()),dpi=500)
+        #plt.close()
         
-        vals = [ val for val in sums[:,i] if val > 0]
+        #print(sums[:,i])
+        
+        vals = [ val for val in sums[2:,i] if val > 0 ]#and val < 1]
 
         plt.figure(figsize=(14,8))
-        plt.scatter(phi_rbn,sums[:,i],marker='.')
-        plt.ylim(0.95*min(vals),1.05*max(vals))
+        plt.scatter(phi_rbn,sums[2:,i],marker='.')
+        plt.ylim(0.9*min(vals),1.1*max(vals))
         plt.xscale('log')
         plt.yscale('log')
-        plt.title('Total Flux vs Reconnection Flux\n%s' % wavelengths[i])
+        plt.title('Total Flux vs Reconnection Flux\n%s\nPercent of Values Missing/Corrupt:%3d %%' % (wavelengths[i],(sums[1,i]/sums[0,i])*100))
         plt.xlabel('Total Unsigned Flare-Ribbon Reconnection Flux [MX]')
         plt.ylabel('Total Flux [W/M^2]')
         plt.grid()
-        plt.show()
+        #plt.show()
+        plt.savefig('/Users/kentritchie1/Desktop/KazachenkoResearch/eveproject/plots/bgstotalflux_%s.pdf' % (wavelengths[i].strip()),dpi=500)
+        #plt.close()
+    
+    for i in range(39):
+        print('Line %s %s: Missing %3d%%\n' % (i, wavelengths[i] , (peaks[1,i]/peaks[0,i])*100))
+    
