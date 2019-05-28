@@ -18,3 +18,13 @@ Week of 5/12 - 5/18:
 -Ordered IDL license for DEM inversions
 
 Week of 5/19 - 5/25:
+-DEM mathematics background readings
+-EVL flux txt files for AIA lines
+-Corrected tstart,tfinal splicing for flux txt files
+-Obtained IDL license, installed IDL87
+-Found RibbonDB date errors, received new database
+-Corrected nfiles algorithm in getEVLflux()
+-Friday 5/24 off (traveling)
+
+Week of 5/26 - 6/1:
+-Monday 5/27 off (Memorial Day)
