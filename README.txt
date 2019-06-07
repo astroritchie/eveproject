@@ -28,3 +28,14 @@ Week of 5/19 - 5/25:
 
 Week of 5/26 - 6/1:
 -Monday 5/27 off (Memorial Day)
+-SSW + CHIANTI setup
+-Setup IDL pathing and startup file
+-IDL session for REU students
+-Background on ch_synethic.pro
+-Began IDL code adjustments for local machine
+
+Week of 6/2 - 6/8:
+-Out most of week due to wisdom tooth extraction
+-Finished IDL code adjustments for local machine
+-Corrected ioneq and elemental abundance input files
+-Created synthetic contribution functions via do_cont.pro
