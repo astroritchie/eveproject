@@ -11,6 +11,9 @@ Method:
 
 '''
 
+import getEVLflux
+import csv as csv
+
 def createTxtFiles():
     with open('/Users/kentritchie1/Desktop/KazachenkoResearch/RibbonDB_v1.0/ribbondb_v1.0.csv', newline='') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')

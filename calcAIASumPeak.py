@@ -3,13 +3,14 @@ Author:
 Kent Ritchie
 
 Purpose:
-Calculate total flux and peak flux values for each flare event in RibbonDB per 39 emission lines
+Calculate total flux and peak flux values for each flare event in RibbonDB for AIA emission lines
+Same function as calcSumPeak but for AIA lines only
 
 Function:
-calcSumPeak()
+calcAIASumPeak()
 
 Parameters:
-None
+save: if True will save .txt files as formatted below in Saves description
 
 Needs:
 3137 .txt files corresponding to flux information for each flare event in RibbonDB as created by createTxtFiles()
@@ -19,7 +20,7 @@ Subfunction Invocations:
 None
 
 Returns:
-None
+fluxSums, fluxPeaks arrays
 
 Saves:
 2 separate .txt files, 1 containing total flux values and 1 containing peak flux values
@@ -32,19 +33,20 @@ Rows correspond to the 39 EVE emission lines
 2nd-3139th columns contain either total flux or peak flux values for each event per respective line
 
 Updates:
-6-28-19: Removed loop to zero out event if background != min flux val
-6-29-19: Made into standalone function via Pycharm
+6-29-19: Created as separate function from calcSumPeak
 '''
 
 import numpy as np
 import os
+import openRibbonDB
 
-def calcSumPeak():
+def calcAIASumPeak(save):
 
     directory = '/Users/kentritchie1/Desktop/KazachenkoResearch/EVE_project/AIALinesFluxTxtFiles/'
+    # directory to save arrays as txt files
 
-    allSums = np.zeros((3139,6),dtype=np.float64)
-    allPeaks = np.zeros((3139,6),dtype=np.float64)
+    fluxSums = np.zeros((3139,7),dtype=object)
+    fluxPeaks = np.zeros((3139,7),dtype=object)
 
     # (0,i) is total number of data points
     # (1,i) is total number of missing data points
@@ -53,6 +55,8 @@ def calcSumPeak():
     totalmissing = 0
     bgnotmin = 0
 
+    keys,tstarts,tpeaks,tfinals = openRibbonDB.openRibbonDB()
+
     for filename in sorted(os.listdir(directory)):
         if filename.endswith('.txt'):
 
@@ -60,18 +64,17 @@ def calcSumPeak():
 
             print('flare',flare)
 
-            for i in range(0,39):
+            fluxSums[flare,0] = keys[flare]
+            fluxPeaks[flare,0] = keys[flare]
+
+            #for i in range(0,39):
+            for i in range(0,6): # use for AIA lines
                 lineflux = data[1:,i+1] # 0th column (:,0) is time in SOD of measurement in that row
                 # 0th row is a header
                 # data file for each event has values of 0 for times outside of event start,end
 
                 missing = 0
-
-                linebgnotmin = 0
-
                 datalength = np.count_nonzero(lineflux) # actual number of data in event
-
-
                 background = lineflux[0] # AR flux value to be subtracted from flare flux values
 
                 '''
@@ -82,7 +85,6 @@ def calcSumPeak():
                     for j in range(len(lineflux)):
                         lineflux[j] = 0
                 '''
-
                 # above comment block zeros out event if background is not the minimum flux during event
 
                 for j in range(len(lineflux)):
@@ -96,23 +98,28 @@ def calcSumPeak():
                             missing +=1
                             totalmissing +=1
 
-                allSums[0,i] = allSums[0,i] + datalength # total number of nz data points per line for all events
-                allSums[1,i] = allSums[1,i] + missing # total number of missing data per line for all events
-                allSums[flare+2,i] = sum(lineflux) # total flux of all events per line
+                fluxSums[0,i+1] = fluxSums[0,i+1] + datalength # total number of nz data points per line for all events
+                fluxSums[1,i+1] = fluxSums[1,i+1] + missing # total number of missing data per line for all events
+                fluxSums[flare+2,i+1] = sum(lineflux) # total flux value per event for each line
 
-                allPeaks[0,i] = allPeaks[0,i] + datalength
-                allPeaks[1,i] = allPeaks[1,i] + missing
-                allPeaks[flare+2,i] = max(lineflux) # maximum flux value per event for each line
+                fluxPeaks[0,i+1] = fluxPeaks[0,i+1] + datalength
+                fluxPeaks[1,i+1] = fluxPeaks[1,i+1] + missing
+                fluxPeaks[flare+2,i+1] = max(lineflux) # maximum flux value per event for each line
 
             flare+=1
 
-    print('Total percent of data points missing:',totalmissing/sum(allSums[0,:]) * 100)
+    print('Total percent of data points missing:',totalmissing/sum(fluxSums[0,:]) * 100)
 
     for i in range(6):
-        print(float(allSums[1,i] / allSums[0,i]) * 100,'% missing sum values for line',i)
-        print(float(allPeaks[1,i] / allPeaks[0,i]) * 100,'% missing peak values for line',i)
+        print(float(fluxSums[1,i+1] / fluxSums[0,i+1]) * 100,'% missing sum values for line',i)
+        print(float(fluxPeaks[1,i+1] / fluxPeaks[0,i+1]) * 100,'% missing peak values for line',i)
 
-    np.savetxt(directory+'total/bgsFlareSums.txt', allSums,fmt = '%1.10f',delimiter=';')
-    np.savetxt(directory+'total/bgsFlarePeaks.txt', allPeaks,fmt = '%1.10f',delimiter=';')
+    if save == True:
+        np.savetxt(directory+'total/AIAFluxSums.txt', fluxSums,fmt = '%1.10f',delimiter=';')
+        print('FluxSums saved:', directory + 'total/AIAFluxPeaks.txt')
+        np.savetxt(directory+'total/AIAFluxPeaks.txt', fluxPeaks,fmt = '%1.10f',delimiter=';')
+        print('FluxPeaks saved:',directory+'total/AIAFlarePeaks.txt')
 
     print('Total background events not usable:',bgnotmin)
+
+    return fluxSums, fluxPeaks
